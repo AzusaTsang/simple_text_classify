@@ -94,6 +94,16 @@ b \leftarrow b-\eta\nabla_{b}\mathcal{L} =
 $$
 
 ```python
+def dotProduct(d1: Counter, d2: Counter) -> float:
+    if len(d1) < len(d2):
+        return dotProduct(d2, d1)
+    else:
+        return sum(d1[f] * v for f, v in d2.items())
+
+def increment(d1: Counter, scale: float, d2: Counter):
+    for f, v in d2.items():
+        d1[f] = d1[f] + v * scale
+
 def learnPredictor(
     trainExamples: list[tuple[str, int]], 
     testExamples: list[tuple[str, int]], 
@@ -131,7 +141,41 @@ featureExtractor = lambda x: extractFeatures(x, 'ngram')
 wv = dict[str, list[float]]() # 从网上下载或自己训练的词向量
 featureExtractor = lambda x: extractFeatures(x, 'wv', wv = wv)
 
+def readExamples(path:str, return_X_y: bool = False) -> Union[list[tuple[str, int]], tuple[list[str], list[int]]]:
+    if return_X_y:
+        X, y = [], []
+    else:
+        examples = []
+    for line in open(path, encoding = 'utf8'):
+        _y, _x = line.split(' ', 1)
+        if return_X_y:
+            X.append(_x.strip())
+            y.append(int(_y))
+        else:
+            examples.append((_x.strip(), int(_y)))
+    print(f'Read {len(X if return_X_y else examples)} examples from {path}')
+    return (X, y) if return_X_y else examples
+
+trainExamples = readExamples('data/data_rt.train')
+testExamples = readExamples('data/data_rt.test')
+
 weights, bias = learnPredictor(trainExamples, testExamples, featureExtractor, numIters=numIters, eta=eta)
+```
+
+## 检验 
+
+```python
+def evaluatePredictor(examples: list[tuple], predictor: Callable) -> float:
+    '''
+    在`examples`上测试`predictor`的性能，返回错误率
+    '''
+    error = 0
+    with open('errors.txt', 'w+', encoding='utf8') as f:
+        for x, y in examples:
+            if predictor(x) != y:
+                error += 1
+                f.write(f'{y:+d} {x}\n')
+    return error / len(examples)
 
 trainError = evaluatePredictor(trainExamples, lambda x: (1 if dotProduct(featureExtractor(x), weights) + bias >= 0 else -1))
 testError = evaluatePredictor(testExamples, lambda x: (1 if dotProduct(featureExtractor(x), weights) + bias >= 0 else -1))
