@@ -1,5 +1,6 @@
 # Simple Text Classifier
 
+https://azusatsang.github.io/2021/07/12/simple_text_classifier.html
 
 ## 数据
 
