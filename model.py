@@ -42,12 +42,11 @@ def learnPredictor(
 ) -> tuple[Counter, float]:
     '''
     给定训练数据和测试数据，特征提取器`featureExtractor`、训练轮数`numIters`和学习率`eta`，
-    返回学习后的权重weights
-    你需要实现随机梯度下降优化权重
+    返回学习后的权重weights与bias
     '''
     losses = []
-    evaltrain = []
-    evaltest = []
+    # evaltrain = []
+    # evaltest = []
     weights = Counter()
     bias = 0.
     for epoch in range(numIters):
